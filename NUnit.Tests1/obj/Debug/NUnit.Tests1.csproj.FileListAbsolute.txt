@@ -16,3 +16,5 @@ C:\Users\noura\Source\Repos\NUnit.Tests1\NUnit.Tests1\obj\Debug\NUnit.Tests1.pdb
 C:\Users\noura\Source\Repos\NUnit.Tests1\NUnit.Tests1\bin\Debug\NUnit.Tests1.dll
 C:\Users\noura\Source\Repos\NUnit.Tests1\NUnit.Tests1\bin\Debug\NUnit.Tests1.pdb
 C:\Users\noura\Source\Repos\NUnit.Tests1\NUnit.Tests1\obj\Debug\NUnit.Tests1.csprojAssemblyReference.cache
+C:\Users\noura\Source\Repos\NUnit.Tests1\NUnit.Tests1\bin\Debug\WebDriver.Support.dll
+C:\Users\noura\Source\Repos\NUnit.Tests1\NUnit.Tests1\bin\Debug\WebDriver.Support.xml
