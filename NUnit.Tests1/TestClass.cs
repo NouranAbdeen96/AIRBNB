@@ -136,21 +136,25 @@ namespace NUnit.Tests1
             //Waiting for a web element on the page to be clickable to be sure that the page is loaded
             WaitUntilElementClickable(By.ClassName("_1usxwsg6"));
 
-            ////Getting the elements by class name: _1g5ss3l where the first three elements are for the applied filters
+            //Checking that the 3 filters appear correctly in the following page
             List<IWebElement> chosenFilters = new List<IWebElement>(webDriver.FindElements(By.ClassName("_1g5ss3l")));
-            if (chosenFilters[0].Text != "Rome")
-            {
-                Assert.Fail("The location filter is incorrect with value: " + chosenFilters[0].Text);
-            }
-            if (chosenFilters[1].Text != "Jan 15 – 23")
-            {
-                Assert.Fail("The Date filter is incorrect with value: " + chosenFilters[1].Text);
-            }
-            if (chosenFilters[2].Text != "3 guests")
-            {
-                Assert.Fail("The Number of guests filter is incorrect with value: " + chosenFilters[2].Text);
-            }
+            if (chosenFilters[0].Text != "Rome")         Assert.Fail("The location filter is incorrect with value: " + chosenFilters[0].Text);
+            if (chosenFilters[1].Text != "Jan 15 – 23")  Assert.Fail("The Date filter is incorrect with value: " + chosenFilters[1].Text);
+            if (chosenFilters[2].Text != "3 guests")     Assert.Fail("The Number of guests filter is incorrect with value: " + chosenFilters[2].Text);
 
+            //Checking that the results can accomodate atleast 3 guests
+            List<IWebElement> roomsDiv = new List<IWebElement>(webDriver.FindElements(By.ClassName("_tmwq9g")));
+            IWebElement numberOfGuestsInRoom;
+            string numberOfGuests;
+            //out int x;
+            //Loop through the offered rooms and check that the min number of guests is 3
+            foreach (IWebElement room in roomsDiv)
+            {
+                numberOfGuestsInRoom = webDriver.FindElement(By.ClassName("_kqh46o"));
+                numberOfGuests = numberOfGuestsInRoom.Text.Split(' ')[0];
+                if (int.TryParse(numberOfGuests,out int x) &&  int.Parse(numberOfGuests) < 3)
+                    Assert.Fail("The number of guests in an offered room is less than 3");
+            }
         }
         [TearDown]
         public void EndTest()
