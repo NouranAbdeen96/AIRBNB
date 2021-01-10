@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
+using System;
 
 namespace NUnit.Tests1
 {
@@ -20,11 +21,10 @@ namespace NUnit.Tests1
         {
             webDriver = new ChromeDriver();
         }
-        [Test]
-        public void TestCase1()
+        public void SearchActions()
         {
             //Variable Declarations
-            //Location TextBox web element
+            //WebElement for Location TextBox
             IWebElement LocationInput;
             //Web Elements for the Check-in and Check-out dates
             IWebElement checkInOutDiv;
@@ -41,20 +41,36 @@ namespace NUnit.Tests1
             IWebElement parentElement;
             IWebElement searchButton;
 
-            //Open airbnb website
-            System.TimeSpan maxWaitTime = new System.TimeSpan(0, 0, 60);
-            webDriver.Manage().Timeouts().PageLoad = maxWaitTime;
-            webDriver.Url = "https://www.airbnb.com/";
+            try
+            {
+                //Open airbnb website
+                System.TimeSpan maxWaitTime = new System.TimeSpan(0, 0, 60);
+                webDriver.Manage().Timeouts().PageLoad = maxWaitTime;
+                webDriver.Url = "https://www.airbnb.com/";
+                //Wait for 5 seconds for the website to load
+                webDriver.Manage().Timeouts().ImplicitWait = System.TimeSpan.FromSeconds(5);
+            }
+            catch (TimeoutException e)
+            {
+                Assert.Fail(e.Message);
+            }
 
-            webDriver.Manage().Timeouts().ImplicitWait = System.TimeSpan.FromSeconds(5);
-
+            //Entering Location = Rome, Italy:
             try
             {
                 //Get the TextBox of location and set the text to "Rome, Italy"
                 By Locator = By.Id("bigsearch-query-detached-query");
                 LocationInput = webDriver.FindElement(Locator);
                 LocationInput.SendKeys("Rome, Italy");
+            }
+            catch (Exception e)
+            {
+                Assert.Fail("Exception Thrown when entering the location. Error Message: "+e.Message);
+            }
 
+            //Check-in and Check-out:
+            try
+            {
                 //Get the DIV that contains the Check in and out dates and click on it to open the calender
                 checkInOutDiv = webDriver.FindElement(By.ClassName("_j8gg2a"));
                 checkInInput = checkInOutDiv.FindElement(By.ClassName("_1akb2mdw"));
@@ -65,7 +81,15 @@ namespace NUnit.Tests1
                 chosenCheckOutDate = webDriver.FindElement(By.XPath(@"/html/body/div[4]/div/div/div/div[1]/div[1]/div/header/div/div[2]/div[2]/div/div/div/form/div/div/div[3]/div[4]/section/div/div/div[1]/div/div/div/div[2]/div[2]/div/div[2]/div/table/tbody/tr[4]/td[7]"));
                 chosenCheckInDate.Click();
                 chosenCheckOutDate.Click();
+            }
+            catch (Exception e)
+            {
+                Assert.Fail("Exception thrown during entering the Check-in and Check-out dates. Error Message: "+e.Message);
+            }
 
+            //Entering the number of guests:
+            try
+            {
                 //Add the number of guests
                 guestsInput = webDriver.FindElement(By.ClassName("_37ivfdq"));
                 guestsInput.Click();
@@ -85,11 +109,17 @@ namespace NUnit.Tests1
                 searchButton.Submit();
 
                 webDriver.Manage().Timeouts().ImplicitWait = System.TimeSpan.FromSeconds(10);
+                //System.Threading.Thread.Sleep(2000);
             }
             catch (System.Exception e)
             {
                 Assert.Fail();
             }
+        }
+        [Test]
+        public void TestCase1()
+        {
+            SearchActions();
         }
         [TearDown]
         public void EndTest()
