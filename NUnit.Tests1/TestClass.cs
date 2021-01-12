@@ -20,6 +20,7 @@ namespace NUnit.Tests1
         public void Initialize()
         {
             webDriver = new ChromeDriver();
+            webDriver.Manage().Window.Maximize();
         }
         public static IWebElement WaitUntilElementClickable(By elementLocator, int timeout = 10)
         {
@@ -58,16 +59,13 @@ namespace NUnit.Tests1
             try
             {
                 //Open airbnb website
-                System.TimeSpan maxWaitTime = new System.TimeSpan(0, 0, 60);
+                System.TimeSpan maxWaitTime = new System.TimeSpan(0, 0, 120);
                 webDriver.Manage().Timeouts().PageLoad = maxWaitTime;
                 webDriver.Url = "https://www.airbnb.com/";
                 //Wait for 5 seconds for the website to load
                 webDriver.Manage().Timeouts().ImplicitWait = System.TimeSpan.FromSeconds(5);
             }
-            catch (TimeoutException e)
-            {
-                Assert.Fail(e.Message);
-            }
+            catch (TimeoutException e) {Assert.Fail(e.Message);}
 
             //Entering Location = Rome, Italy:
             try
@@ -77,10 +75,7 @@ namespace NUnit.Tests1
                 LocationInput = webDriver.FindElement(Locator);
                 LocationInput.SendKeys("Rome, Italy");
             }
-            catch (Exception e)
-            {
-                Assert.Fail("Exception Thrown when entering the location. Error Message: " + e.Message);
-            }
+            catch (Exception e) {Assert.Fail("Exception Thrown when entering the location. Error Message: " + e.Message);}
 
             //Check-in and Check-out:
             try
@@ -95,10 +90,7 @@ namespace NUnit.Tests1
                 chosenCheckInDate.Click();
                 chosenCheckOutDate.Click();
             }
-            catch (Exception e)
-            {
-                Assert.Fail("Exception thrown during entering the Check-in and Check-out dates. Error Message: "+e.Message);
-            }
+            catch (Exception e) {Assert.Fail("Exception thrown during entering the Check-in and Check-out dates. Error Message: "+e.Message);}
 
             //Entering the number of guests:
             try
@@ -119,15 +111,12 @@ namespace NUnit.Tests1
                 //Submit the search
                 parentElement = webDriver.FindElement(By.ClassName("_w64aej"));
                 searchButton = parentElement.FindElement(By.ClassName("_1mzhry13"));
+                System.Threading.Thread.Sleep(2000);
                 searchButton.Submit();
 
                 webDriver.Manage().Timeouts().ImplicitWait = System.TimeSpan.FromSeconds(10);
-                //System.Threading.Thread.Sleep(2000);
             }
-            catch (System.Exception e)
-            {
-                Assert.Fail();
-            }
+            catch (System.Exception e) {Assert.Fail("Exception thown during selecting the number of guests. Error Message: "+e.Message);}
         }
         [Test]
         public void TestCase1()
@@ -146,7 +135,6 @@ namespace NUnit.Tests1
             List<IWebElement> roomsDiv = new List<IWebElement>(webDriver.FindElements(By.ClassName("_tmwq9g")));
             IWebElement numberOfGuestsInRoom;
             string numberOfGuests;
-            //out int x;
             //Loop through the offered rooms and check that the min number of guests is 3
             foreach (IWebElement room in roomsDiv)
             {
@@ -155,6 +143,62 @@ namespace NUnit.Tests1
                 if (int.TryParse(numberOfGuests,out int x) &&  int.Parse(numberOfGuests) < 3)
                     Assert.Fail("The number of guests in an offered room is less than 3");
             }
+        }
+        [Test]
+        public void TestCase2()
+        {
+            SearchActions();
+            //Wait for page buttons to be clickable
+           // WaitUntilElementClickable(By.ClassName("_t6p96s"),20);
+
+            //Clicking on more filters button
+            IWebElement moreFiltersParentDiv = webDriver.FindElement(By.Id("menuItemButton-dynamicMoreFilters"));
+            IWebElement moreFiltersButton = moreFiltersParentDiv.FindElement(By.ClassName("_t6p96s"));
+            moreFiltersButton.Click();
+
+            //Adding 5 bedrooms
+            try
+            {
+                IWebElement bedroomFilterParentDiv = webDriver.FindElements(By.ClassName("_jwbbkz"))[1];
+                IWebElement bedroomFilterStepper = bedroomFilterParentDiv.FindElements(By.ClassName("_7hhhl3"))[1];
+                int numOfBedrooms = 5;
+                for (int i = 0; i < numOfBedrooms; i++) bedroomFilterStepper.Click();
+            }
+            catch (Exception e) {Assert.Fail("Exception thrown when choosing the number of bedrooms. Error Message: "+e.Message);}
+
+            //Choose Pool From Facilities
+            try
+            {
+                IWebElement poolCheckBox = webDriver.FindElement(By.Id("filterItem-facilities-checkbox-amenities-7"));
+                poolCheckBox.Click();
+            }
+            catch (Exception e) {Assert.Fail("Exception thrown when choosing Pool facility. Error Message: "+e.Message);}
+
+            //Show Stays
+            IWebElement showStaysButton = webDriver.FindElement(By.ClassName("_m095vcq"));
+            showStaysButton.Click();
+
+            //Check no of bedrooms in first page have 5 bedrooms
+            List<IWebElement> roomsDiv = new List<IWebElement>(webDriver.FindElements(By.ClassName("_tmwq9g")));
+            IWebElement numberOfBedroomsInRoom;
+            string numberOfBedrooms;
+            WaitUntilElementClickable(By.ClassName("_kqh46o"),30);
+            //Loop through the offered rooms and check that the number of bedrooms is 5
+            foreach (IWebElement room in roomsDiv)
+            {
+                numberOfBedroomsInRoom = webDriver.FindElement(By.ClassName("_kqh46o"));
+                numberOfBedrooms = numberOfBedroomsInRoom.Text.Split(' ')[3];
+                if (int.TryParse(numberOfBedrooms, out int x) && int.Parse(numberOfBedrooms) < 5)
+                    Assert.Fail("The number of bedrooms in the room is less than 5. The number of bedrooms: "+ numberOfBedrooms);
+            }
+
+            //Open the first property
+            IWebElement firstProperty = webDriver.FindElement(By.ClassName("_tmwq9g"));
+            IWebElement link = webDriver.FindElement(By.XPath("//*[@id='ExploreLayoutController']/div/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div/div/div/div[1]/div/div/div/div/div[2]/a"));
+            link.Click();
+            //link.Submit();
+            System.Threading.Thread.Sleep(10000);
+
         }
         [TearDown]
         public void EndTest()
