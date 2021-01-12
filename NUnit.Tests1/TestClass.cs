@@ -196,7 +196,24 @@ namespace NUnit.Tests1
             IWebElement firstProperty = webDriver.FindElement(By.ClassName("_tmwq9g"));
             IWebElement link = webDriver.FindElement(By.XPath("//*[@id='ExploreLayoutController']/div/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div/div/div/div[1]/div/div/div/div/div[2]/a"));
             link.Click();
-            //link.Submit();
+
+            System.Threading.Thread.Sleep(1000);
+
+            var browserTabs = webDriver.WindowHandles;
+            webDriver.SwitchTo().Window(browserTabs[1]);
+
+            //Check Pool facility
+            List<IWebElement> amenitiesParentDivs = new List<IWebElement>(webDriver.FindElements(By.ClassName("_1nlbjeu")));
+            IWebElement childDiv;
+            bool poolIsAvailable = false;
+            foreach (IWebElement parentDiv in amenitiesParentDivs)
+            {
+                childDiv = parentDiv.FindElement(By.CssSelector("div"));
+                if (childDiv.Text == "Pool")
+                    poolIsAvailable = true;
+            }
+            if (poolIsAvailable == false)
+                Assert.Fail("Pool Amenity is not available");
             System.Threading.Thread.Sleep(10000);
 
         }
