@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
+using OpenQA.Selenium.Interactions;
 using System;
 
 namespace NUnit.Tests1
@@ -193,9 +194,9 @@ namespace NUnit.Tests1
             }
 
             //Open the first property
-            IWebElement firstProperty = webDriver.FindElement(By.ClassName("_tmwq9g"));
-            IWebElement link = webDriver.FindElement(By.XPath("//*[@id='ExploreLayoutController']/div/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div/div/div/div[1]/div/div/div/div/div[2]/a"));
-            link.Click();
+            //IWebElement firstProperty = webDriver.FindElement(By.ClassName("_tmwq9g"));
+            IWebElement firstPropertyLink = webDriver.FindElement(By.XPath("//*[@id='ExploreLayoutController']/div/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div/div/div/div[1]/div/div/div/div/div[2]/a"));
+            firstPropertyLink.Click();
 
             System.Threading.Thread.Sleep(1000);
 
@@ -217,6 +218,133 @@ namespace NUnit.Tests1
             System.Threading.Thread.Sleep(10000);
 
         }
+        [Test]
+        public void TestCase3()
+        {
+            //Variable Declarations
+            Actions hoverAction = new Actions(webDriver);
+            IWebElement firstProperty;
+            IWebElement firstPropertyButton;
+            string firstPropertyName;
+            string expectedColor;
+            string[] firstPropertySearchDetails;
+            string[] firstPropertyMapDetails;
+
+            SearchActions();
+            System.Threading.Thread.Sleep(20000);
+
+            //Hovering over the first property
+            firstProperty = webDriver.FindElement(By.ClassName("_tmwq9g"));
+            hoverAction.MoveToElement(firstProperty).Perform();
+
+            //Checking that the first property id displayed on the map by its name
+            firstPropertyName = getFirstPropertyName();
+            firstPropertyButton = getFirstPropertyFromMap(firstPropertyName);
+            if (firstPropertyButton == null) 
+                Assert.Fail("First property is not displayed on the map");
+
+            //Checking the color of the property on the map
+            expectedColor = "rgba(72, 72, 72, 1)";
+            checkColor(firstPropertyButton, expectedColor);
+            if (checkColor(firstPropertyButton, expectedColor) != true)
+                Assert.Fail("The color on the map is incorrect.");
+
+            //Opening the property on the map
+            System.Threading.Thread.Sleep(2000);
+
+            //Getting property details in search page
+            //firstPropertyButton.Click();
+            //firstPropertySearchDetails = getFirstPropertyDetails();
+            firstPropertyButton.Click();
+            firstPropertyMapDetails = getFirstPropertyDetailsMap();
+
+            //for (int i = 0; i < 6; i++)
+            //{
+            //    if (i == 1) continue;
+            //    if (firstPropertySearchDetails[i] != firstPropertyMapDetails[i])
+            //        Assert.Fail("Search and Map details do not match. Search Info: " + firstPropertySearchDetails[i] + " Map Info:" + firstPropertyMapDetails[i]);
+            //}
+            System.Threading.Thread.Sleep(20000);
+
+        }
+
+        private string[] getFirstPropertyDetailsMap()
+        {
+            IWebElement map = webDriver.FindElement(By.ClassName("_1q6k59c"));
+            IWebElement parent = map.FindElement(By.ClassName("_1jqckyi"));
+            List<IWebElement> spans = new List<IWebElement>(map.FindElements(By.CssSelector("span")));
+
+            IWebElement mapParentDiv = webDriver.FindElement(By.ClassName("_1x0fg6n"));
+            string[] details = new string[6];
+
+            TimeSpan t = new TimeSpan(0,0,30);
+            WebDriverWait wait = new WebDriverWait(webDriver, t);
+            //wait.Until(ExpectedConditions.PresenceOfAllElementsLocatedBy(By.ClassName("_olc9rf0")));
+
+            Assert.Fail(spans[2].Text);
+            details[0] = spans[2].Text;
+            details[2] = (mapParentDiv.FindElement(By.ClassName("_1isz8pdq"))).Text;
+            details[3] = (mapParentDiv.FindElement(By.ClassName("_11ry7lz"))).Text;
+            details[4] = (mapParentDiv.FindElement(By.ClassName("_a7a5sx"))).Text;
+            details[5] = (mapParentDiv.FindElement(By.ClassName("_16shi2n"))).Text;
+
+            return details;
+        }
+
+        private string[] getFirstPropertyDetails()
+        {
+            IWebElement parent = webDriver.FindElement(By.ClassName("_1jqckyi"));
+            List<IWebElement> spans = new List<IWebElement>(parent.FindElements(By.CssSelector("span")));
+
+            string[] details = new string[6];
+            System.Threading.Thread.Sleep(2000);
+
+            TimeSpan t = new TimeSpan(0, 0, 30);
+            WebDriverWait wait = new WebDriverWait(webDriver, t);
+            //wait.Until(ExpectedConditions.PresenceOfAllElementsLocatedBy(By.ClassName("_olc9rf0")));
+
+            details[0] = spans[2].Text;
+            details[1] = (webDriver.FindElement(By.ClassName("_b14dlit"))).Text;
+            details[2] = (webDriver.FindElement(By.ClassName("_bzh5lkq"))).Text;
+            details[3] = (webDriver.FindElement(By.ClassName("_10fy1f8"))).Text;
+            details[4] = (webDriver.FindElement(By.ClassName("_a7a5sx"))).Text;
+            details[5] = (webDriver.FindElement(By.ClassName("_16shi2n"))).Text;
+
+            return details;
+        }
+
+        private bool checkColor(IWebElement firstPropertyButton, string expectedColor)
+        {
+            string displayedColor = firstPropertyButton.GetCssValue("color");
+            if (displayedColor != expectedColor)
+                return false;
+            return true;
+        }
+
+        private string getFirstPropertyName()
+        {
+            IWebElement firstPropertyNameDiv = webDriver.FindElement(By.ClassName("_8s3ctt"));
+            IWebElement firstPropertyLink = firstPropertyNameDiv.FindElement(By.ClassName("_gjfol0"));
+            return firstPropertyLink.GetAttribute("aria-label");
+        }
+
+        private IWebElement getFirstPropertyFromMap(string firstPropertyName)
+        {
+            IWebElement firstPropertyButton = null;
+            IWebElement mapButtonsParentDiv = webDriver.FindElement(By.ClassName("gm-style"));
+            List<IWebElement> mapButtons = new List<IWebElement>(mapButtonsParentDiv.FindElements(By.TagName("Button")));
+            //getFirstPropertyFromMap(firstPropertyButton);
+            foreach (IWebElement button in mapButtons)
+            {
+                if (button.GetAttribute("aria-label").Contains(firstPropertyName))
+                {
+                    firstPropertyButton = button;
+                    break;
+                }
+            }
+            return firstPropertyButton;
+        }
+
         [TearDown]
         public void EndTest()
         {
