@@ -123,20 +123,24 @@ namespace NUnit.Tests1
         [Test]
         public void TestCase1()
         {
+            //Variables Declaration
+            List<IWebElement> chosenFilters;
+            List<IWebElement> roomsDiv;
+            IWebElement numberOfGuestsInRoom;
+            string numberOfGuests;
+
             SearchActions();
             //Waiting for a web element on the page to be clickable to be sure that the page is loaded
             WaitUntilElementClickable(By.ClassName("_1usxwsg6"));
 
             //Checking that the 3 filters appear correctly in the following page
-            List<IWebElement> chosenFilters = new List<IWebElement>(webDriver.FindElements(By.ClassName("_1g5ss3l")));
+            chosenFilters = new List<IWebElement>(webDriver.FindElements(By.ClassName("_1g5ss3l")));
             if (chosenFilters[0].Text != "Rome")         Assert.Fail("The location filter is incorrect with value: " + chosenFilters[0].Text);
             if (chosenFilters[1].Text != "Jan 15 – 23")  Assert.Fail("The Date filter is incorrect with value: " + chosenFilters[1].Text);
             if (chosenFilters[2].Text != "3 guests")     Assert.Fail("The Number of guests filter is incorrect with value: " + chosenFilters[2].Text);
 
             //Checking that the results can accomodate atleast 3 guests
-            List<IWebElement> roomsDiv = new List<IWebElement>(webDriver.FindElements(By.ClassName("_tmwq9g")));
-            IWebElement numberOfGuestsInRoom;
-            string numberOfGuests;
+            roomsDiv = new List<IWebElement>(webDriver.FindElements(By.ClassName("_tmwq9g")));
             //Loop through the offered rooms and check that the min number of guests is 3
             foreach (IWebElement room in roomsDiv)
             {
