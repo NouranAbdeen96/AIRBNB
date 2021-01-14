@@ -149,20 +149,28 @@ namespace NUnit.Tests1
         [Test]
         public void TestCase2()
         {
+            //Variables Declarations
+            IWebElement moreFiltersParentDiv;
+            IWebElement moreFiltersButton;
+            IWebElement bedroomFilterParentDiv;
+            IWebElement bedroomFilterStepper;
+            IWebElement poolCheckBox;
+            IWebElement showStaysButton;
+            IWebElement firstPropertyLink;
+            List<IWebElement> roomsDiv;
+
             SearchActions();
-            //Wait for page buttons to be clickable
-           // WaitUntilElementClickable(By.ClassName("_t6p96s"),20);
 
             //Clicking on more filters button
-            IWebElement moreFiltersParentDiv = webDriver.FindElement(By.Id("menuItemButton-dynamicMoreFilters"));
-            IWebElement moreFiltersButton = moreFiltersParentDiv.FindElement(By.ClassName("_t6p96s"));
+            moreFiltersParentDiv = webDriver.FindElement(By.Id("menuItemButton-dynamicMoreFilters"));
+            moreFiltersButton = moreFiltersParentDiv.FindElement(By.ClassName("_t6p96s"));
             moreFiltersButton.Click();
 
             //Adding 5 bedrooms
             try
             {
-                IWebElement bedroomFilterParentDiv = webDriver.FindElements(By.ClassName("_jwbbkz"))[1];
-                IWebElement bedroomFilterStepper = bedroomFilterParentDiv.FindElements(By.ClassName("_7hhhl3"))[1];
+                bedroomFilterParentDiv = webDriver.FindElements(By.ClassName("_jwbbkz"))[1];
+                bedroomFilterStepper = bedroomFilterParentDiv.FindElements(By.ClassName("_7hhhl3"))[1];
                 int numOfBedrooms = 5;
                 for (int i = 0; i < numOfBedrooms; i++) bedroomFilterStepper.Click();
             }
@@ -171,52 +179,62 @@ namespace NUnit.Tests1
             //Choose Pool From Facilities
             try
             {
-                IWebElement poolCheckBox = webDriver.FindElement(By.Id("filterItem-facilities-checkbox-amenities-7"));
+                poolCheckBox = webDriver.FindElement(By.Id("filterItem-facilities-checkbox-amenities-7"));
                 poolCheckBox.Click();
             }
             catch (Exception e) {Assert.Fail("Exception thrown when choosing Pool facility. Error Message: "+e.Message);}
 
             //Show Stays
-            IWebElement showStaysButton = webDriver.FindElement(By.ClassName("_m095vcq"));
+            showStaysButton = webDriver.FindElement(By.ClassName("_m095vcq"));
             showStaysButton.Click();
 
             //Check no of bedrooms in first page have 5 bedrooms
-            List<IWebElement> roomsDiv = new List<IWebElement>(webDriver.FindElements(By.ClassName("_tmwq9g")));
-            IWebElement numberOfBedroomsInRoom;
-            string numberOfBedrooms;
+            roomsDiv = new List<IWebElement>(webDriver.FindElements(By.ClassName("_tmwq9g")));
             WaitUntilElementClickable(By.ClassName("_kqh46o"),30);
             //Loop through the offered rooms and check that the number of bedrooms is 5
-            foreach (IWebElement room in roomsDiv)
-            {
-                numberOfBedroomsInRoom = webDriver.FindElement(By.ClassName("_kqh46o"));
-                numberOfBedrooms = numberOfBedroomsInRoom.Text.Split(' ')[3];
-                if (int.TryParse(numberOfBedrooms, out int x) && int.Parse(numberOfBedrooms) < 5)
-                    Assert.Fail("The number of bedrooms in the room is less than 5. The number of bedrooms: "+ numberOfBedrooms);
-            }
+            checkNumberOfBedroomsInFirstPage(5);
 
             //Open the first property
-            //IWebElement firstProperty = webDriver.FindElement(By.ClassName("_tmwq9g"));
-            IWebElement firstPropertyLink = webDriver.FindElement(By.XPath("//*[@id='ExploreLayoutController']/div/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div/div/div/div[1]/div/div/div/div/div[2]/a"));
+            firstPropertyLink = webDriver.FindElement(By.XPath("//*[@id='ExploreLayoutController']/div/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div/div/div/div[1]/div/div/div/div/div[2]/a"));
             firstPropertyLink.Click();
 
             System.Threading.Thread.Sleep(1000);
-
+            //Switch to the newly opened tab
             var browserTabs = webDriver.WindowHandles;
             webDriver.SwitchTo().Window(browserTabs[1]);
 
             //Check Pool facility
+            checkAmenitiesInRoom("Pool");
+            System.Threading.Thread.Sleep(10000);
+        }
+        void checkAmenitiesInRoom(string amenitiyName)
+        {
             List<IWebElement> amenitiesParentDivs = new List<IWebElement>(webDriver.FindElements(By.ClassName("_1nlbjeu")));
             IWebElement childDiv;
             bool poolIsAvailable = false;
             foreach (IWebElement parentDiv in amenitiesParentDivs)
             {
                 childDiv = parentDiv.FindElement(By.CssSelector("div"));
-                if (childDiv.Text == "Pool")
+                if (childDiv.Text == amenitiyName)
                     poolIsAvailable = true;
             }
             if (poolIsAvailable == false)
                 Assert.Fail("Pool Amenity is not available");
-            System.Threading.Thread.Sleep(10000);
+
+        }
+        void checkNumberOfBedroomsInFirstPage(int expectedNo)
+        {
+            List<IWebElement>  roomsDiv = new List<IWebElement>(webDriver.FindElements(By.ClassName("_tmwq9g")));
+            
+            WaitUntilElementClickable(By.ClassName("_kqh46o"), 30);
+            //Loop through the offered rooms and check that the number of bedrooms is 5
+            foreach (IWebElement room in roomsDiv)
+            {
+                IWebElement numberOfBedroomsInRoom = webDriver.FindElement(By.ClassName("_kqh46o"));
+                string numberOfBedrooms = numberOfBedroomsInRoom.Text.Split(' ')[3];
+                if (int.TryParse(numberOfBedrooms, out int x) && int.Parse(numberOfBedrooms) < expectedNo)
+                    Assert.Fail("The number of bedrooms in the room is less than 5. The number of bedrooms: " + numberOfBedrooms);
+            }
 
         }
         [Test]
@@ -267,9 +285,7 @@ namespace NUnit.Tests1
                     Assert.Pass(firstPropertySearchDetails[i] + "  " + firstPropertyMapDetails[i]); 
                 }
             }
-            Assert.Pass();
             System.Threading.Thread.Sleep(20000);
-
         }
 
 
