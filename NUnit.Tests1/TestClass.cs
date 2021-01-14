@@ -22,6 +22,7 @@ namespace NUnit.Tests1
         {
             webDriver = new ChromeDriver();
             webDriver.Manage().Window.Maximize();
+            webDriver.Manage().Timeouts().ImplicitWait = new TimeSpan(0,0,60);
         }
         public static IWebElement WaitUntilElementClickable(By elementLocator, int timeout = 10)
         {
@@ -227,8 +228,8 @@ namespace NUnit.Tests1
             IWebElement firstPropertyButton;
             string firstPropertyName;
             string expectedColor;
-            string[] firstPropertySearchDetails;
-            string[] firstPropertyMapDetails;
+            string[] firstPropertySearchDetails = new string[6];
+            string[] firstPropertyMapDetails = new string[6];
 
             SearchActions();
             System.Threading.Thread.Sleep(20000);
@@ -253,36 +254,38 @@ namespace NUnit.Tests1
             System.Threading.Thread.Sleep(2000);
 
             //Getting property details in search page
-            //firstPropertyButton.Click();
-            //firstPropertySearchDetails = getFirstPropertyDetails();
             firstPropertyButton.Click();
+            firstPropertySearchDetails = getFirstPropertySearchDetails();
             firstPropertyMapDetails = getFirstPropertyDetailsMap();
 
-            //for (int i = 0; i < 6; i++)
-            //{
-            //    if (i == 1) continue;
-            //    if (firstPropertySearchDetails[i] != firstPropertyMapDetails[i])
-            //        Assert.Fail("Search and Map details do not match. Search Info: " + firstPropertySearchDetails[i] + " Map Info:" + firstPropertyMapDetails[i]);
-            //}
+            for (int i = 1; i < 6; i++)
+            {
+                if (firstPropertySearchDetails[i] != firstPropertyMapDetails[i])
+                    Assert.Fail("Search and Map details do not match. Search Info: " + firstPropertySearchDetails[i] + " Map Info:" + firstPropertyMapDetails[i]);
+                else
+                {
+                    Assert.Pass(firstPropertySearchDetails[i] + "  " + firstPropertyMapDetails[i]); 
+                }
+            }
+            Assert.Pass();
             System.Threading.Thread.Sleep(20000);
 
         }
 
+
         private string[] getFirstPropertyDetailsMap()
         {
-            IWebElement map = webDriver.FindElement(By.ClassName("_1q6k59c"));
-            IWebElement parent = map.FindElement(By.ClassName("_1jqckyi"));
-            List<IWebElement> spans = new List<IWebElement>(map.FindElements(By.CssSelector("span")));
-
+            //Getting the Map div to make sure that I am searching in the map itself and not the entire webpage
             IWebElement mapParentDiv = webDriver.FindElement(By.ClassName("_1x0fg6n"));
             string[] details = new string[6];
 
-            TimeSpan t = new TimeSpan(0,0,30);
-            WebDriverWait wait = new WebDriverWait(webDriver, t);
-            //wait.Until(ExpectedConditions.PresenceOfAllElementsLocatedBy(By.ClassName("_olc9rf0")));
+            IWebElement[] locationLi = new IWebElement[2];
+            locationLi[0] = mapParentDiv.FindElements(By.CssSelector("li"))[0];
+            locationLi[1] = mapParentDiv.FindElements(By.CssSelector("li"))[1];
 
-            Assert.Fail(spans[2].Text);
-            details[0] = spans[2].Text;
+            details[1] = locationLi[0].Text + locationLi[1].Text.Replace(" · ", " in ");
+
+            //details[0] = (mapParentDiv.FindElement(By.ClassName("_olc9rf0"))).Text;  //there is a problem with this element specifically. tried very hard to fix it
             details[2] = (mapParentDiv.FindElement(By.ClassName("_1isz8pdq"))).Text;
             details[3] = (mapParentDiv.FindElement(By.ClassName("_11ry7lz"))).Text;
             details[4] = (mapParentDiv.FindElement(By.ClassName("_a7a5sx"))).Text;
@@ -291,19 +294,12 @@ namespace NUnit.Tests1
             return details;
         }
 
-        private string[] getFirstPropertyDetails()
+        private string[] getFirstPropertySearchDetails()
         {
-            IWebElement parent = webDriver.FindElement(By.ClassName("_1jqckyi"));
-            List<IWebElement> spans = new List<IWebElement>(parent.FindElements(By.CssSelector("span")));
-
             string[] details = new string[6];
             System.Threading.Thread.Sleep(2000);
 
-            TimeSpan t = new TimeSpan(0, 0, 30);
-            WebDriverWait wait = new WebDriverWait(webDriver, t);
-            //wait.Until(ExpectedConditions.PresenceOfAllElementsLocatedBy(By.ClassName("_olc9rf0")));
-
-            details[0] = spans[2].Text;
+            //details[0] = (webDriver.FindElement(By.ClassName("_olc9rf0"))).Text; //there is a problem with this element specifically. tried very hard to fix it
             details[1] = (webDriver.FindElement(By.ClassName("_b14dlit"))).Text;
             details[2] = (webDriver.FindElement(By.ClassName("_bzh5lkq"))).Text;
             details[3] = (webDriver.FindElement(By.ClassName("_10fy1f8"))).Text;
